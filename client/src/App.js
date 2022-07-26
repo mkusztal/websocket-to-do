@@ -1,5 +1,6 @@
 import io from 'socket.io-client';
 import { useEffect, useState } from 'react';
+import shortid from 'shortid';
 
 const App = () => {
   const [socket, setSocket] = useState(null);
@@ -10,16 +11,18 @@ const App = () => {
     const socket = io('http://localhost:8000');
     setSocket(socket);
 
-    socket.on('removeTask', (taskId) => {
-      removeTask(taskId);
-    });
-    socket.on('addTask', (task) => {
-      addTask(task);
-    });
     socket.on('updateTask', (tasks) => {
       updateTasks(tasks);
     });
-  });
+
+    socket.on('addTask', (task) => {
+      addTask(task);
+    });
+
+    socket.on('removeTask', (taskId) => {
+      removeTask(taskId);
+    });
+  }, []);
 
   const removeTask = (taskId, isLocal) => {
     setTasks((tasks) => tasks.filter((task) => task.id !== taskId));
@@ -28,17 +31,19 @@ const App = () => {
     }
   };
 
-  const addTask = (task) => {
-    setTasks((tasks) => [...tasks, task]);
-  };
-
   const updateTasks = (tasksData) => {
     setTasks(tasksData);
   };
 
+  const addTask = (task) => {
+    setTasks((tasks) => [...tasks, task]);
+    setTaskName('');
+  };
+
   const submitForm = (e) => {
     e.preventDefault();
-    addTask({ name: taskName });
+    addTask({ name: taskName, id: shortid() });
+    socket.emit('addTask', { name: taskName, id: shortid() });
   };
 
   return (
