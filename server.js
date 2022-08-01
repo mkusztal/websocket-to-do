@@ -1,11 +1,12 @@
 const express = require('express');
+const path = require('path');
 const socket = require('socket.io');
 
 const app = express();
 let tasks = [];
 
 // middleware
-// app.use(express.static(path.join(__dirname, '/client')));
+app.use(express.static(path.join(__dirname, '/client/')));
 
 app.use((req, res) => {
   res.status(404).send('404 not found...');
@@ -26,7 +27,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('removeTask', (task) => {
-    tasks = tasks.filter((task) => task.id !== task);
+    tasks = tasks.filter((task) => task.id !== tasks.id);
     socket.broadcast.emit('removeTask', task.id);
   });
 });
